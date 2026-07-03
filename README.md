@@ -61,6 +61,23 @@ Claude to re-publish as the artifact.
 pip install pandas openpyxl
 ```
 
+## Hosting (GitHub Pages)
+
+`.github/workflows/deploy.yml` auto-publishes the site on every push to the
+default branch: it installs deps, runs `build.py`, and deploys `dist/` to
+GitHub Pages. No manual steps after the first push.
+
+Live URL (after the first successful deploy):
+**https://brendanchenry.github.io/fantasy-league-record-book/**
+
+To update the public site: edit `data/league_finish.xlsx` (or the template),
+commit, and `git push`. The Action rebuilds and redeploys in ~1 minute.
+
+> Note: Pages serves a **public** URL even though the repo is private. If the
+> first deploy is blocked because the repo is private on a free plan, make the
+> repo public (`gh repo edit --visibility public`) — the page only contains
+> fantasy nicknames and stats.
+
 ## Known data gaps / roadmap
 
 - Four 2009 teams have no manager name and show as **Unknown** — fill them in
