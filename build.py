@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the League Record Book.
+"""Build the Hundo League Record Book.
 
 Reads the league data (Excel) + the HTML template, computes all stats, injects
 them as JSON into the template, and writes the final page to dist/index.html.

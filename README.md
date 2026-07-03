@@ -1,4 +1,4 @@
-# The League Record Book
+# Hundo League Record Book
 
 A historical archive for our 12-manager fantasy football league — 17 seasons
 (2009–2025) of champions, career records, and superlatives. It's a **legacy /
