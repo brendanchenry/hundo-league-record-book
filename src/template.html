@@ -1,0 +1,559 @@
+<title>The League Record Book</title>
+<style>
+  :root{
+    --page:#E7E9E5; --surface:#FBFAF7; --surface-2:#EFF1EC;
+    --ink:#11171D; --ink-2:#47535D; --muted:#79848D;
+    --line:rgba(17,23,29,0.12); --line-strong:rgba(17,23,29,0.24);
+    --gold-text:#7A5810; --gold-bright:#9A7112; --gold-bar:#A9781A;
+    --teal:#0883A0; --red:#BE3A2C; --good:#0A7A34;
+    --ring:rgba(169,120,26,0.32);
+    --shadow:0 1px 2px rgba(17,23,29,.06),0 8px 30px rgba(17,23,29,.08);
+    --font-display:"Bahnschrift SemiBold Condensed","Bahnschrift","Oswald","DIN Condensed","Haettenschweiler","Franklin Gothic Cond","Arial Narrow Bold",Impact,sans-serif;
+    --font-body:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --page:#0B0F14; --surface:#141B22; --surface-2:#1A232B;
+      --ink:#F2F5F3; --ink-2:#AAB6BF; --muted:#7E8A94;
+      --line:rgba(255,255,255,0.10); --line-strong:rgba(255,255,255,0.20);
+      --gold-text:#E4B84A; --gold-bright:#F0C65C; --gold-bar:#AD8129;
+      --teal:#2E9FB8; --red:#DE6457; --good:#46C06B;
+      --ring:rgba(228,184,74,0.30);
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"]{
+    --page:#E7E9E5; --surface:#FBFAF7; --surface-2:#EFF1EC;
+    --ink:#11171D; --ink-2:#47535D; --muted:#79848D;
+    --line:rgba(17,23,29,0.12); --line-strong:rgba(17,23,29,0.24);
+    --gold-text:#7A5810; --gold-bright:#9A7112; --gold-bar:#A9781A;
+    --teal:#0883A0; --red:#BE3A2C; --good:#0A7A34; --ring:rgba(169,120,26,0.32);
+    --shadow:0 1px 2px rgba(17,23,29,.06),0 8px 30px rgba(17,23,29,.08);
+  }
+  :root[data-theme="dark"]{
+    --page:#0B0F14; --surface:#141B22; --surface-2:#1A232B;
+    --ink:#F2F5F3; --ink-2:#AAB6BF; --muted:#7E8A94;
+    --line:rgba(255,255,255,0.10); --line-strong:rgba(255,255,255,0.20);
+    --gold-text:#E4B84A; --gold-bright:#F0C65C; --gold-bar:#AD8129;
+    --teal:#2E9FB8; --red:#DE6457; --good:#46C06B; --ring:rgba(228,184,74,0.30);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.45);
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--page);color:var(--ink);font-family:var(--font-body);
+    line-height:1.55;-webkit-font-smoothing:antialiased;margin:0;
+    font-variant-numeric:tabular-nums;}
+  .book{max-width:1120px;margin:0 auto;padding:0 22px 96px;}
+  h1,h2,h3{margin:0;text-wrap:balance}
+  a{color:inherit}
+  .num{font-variant-numeric:tabular-nums}
+  .disp{font-family:var(--font-display);font-weight:600;letter-spacing:.01em}
+
+  /* ---------- MASTHEAD ---------- */
+  .masthead{padding:70px 0 42px;border-bottom:1px solid var(--line-strong);position:relative}
+  .crest{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+  .crest .mark{width:40px;height:40px;flex:0 0 auto;position:relative}
+  .eyebrow{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.26em;
+    font-size:12.5px;color:var(--gold-text);font-weight:600}
+  .masthead h1{font-family:var(--font-display);text-transform:uppercase;
+    font-weight:600;letter-spacing:.005em;line-height:.9;
+    font-size:clamp(52px,10.5vw,120px);margin:6px 0 0}
+  .masthead h1 .thin{display:block;color:var(--ink-2);font-size:.34em;letter-spacing:.16em;
+    margin-top:.5em}
+  .lede{max-width:60ch;color:var(--ink-2);font-size:17px;margin:26px 0 0}
+  .lede b{color:var(--ink);font-weight:600}
+  .hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:40px;
+    background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .hstat{background:var(--surface);padding:20px 20px 18px}
+  .hstat .v{font-family:var(--font-display);font-weight:600;font-size:clamp(34px,5vw,52px);
+    line-height:.95;color:var(--ink)}
+  .hstat.gold .v{color:var(--gold-text)}
+  .hstat .k{font-size:12px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);
+    margin-top:8px}
+  .hstat .sub{font-size:12.5px;color:var(--ink-2);margin-top:3px}
+
+  .theme-toggle{position:absolute;top:22px;right:0;border:1px solid var(--line-strong);
+    background:var(--surface);color:var(--ink-2);border-radius:999px;padding:7px 14px;
+    font-family:var(--font-body);font-size:12.5px;cursor:pointer;letter-spacing:.02em}
+  .theme-toggle:hover{color:var(--ink);border-color:var(--gold-text)}
+
+  /* ---------- CHAPTERS ---------- */
+  .chapter{padding:62px 0 8px;scroll-margin-top:20px}
+  .chead{display:flex;align-items:baseline;gap:16px;margin-bottom:6px;
+    border-bottom:1px solid var(--line);padding-bottom:14px}
+  .chead .rn{font-family:var(--font-display);color:var(--gold-text);font-weight:600;
+    font-size:20px;letter-spacing:.08em;flex:0 0 auto}
+  .chead h2{font-family:var(--font-display);text-transform:uppercase;font-weight:600;
+    font-size:clamp(28px,4.4vw,42px);letter-spacing:.01em;line-height:1}
+  .chead .note{margin-left:auto;color:var(--muted);font-size:13px;max-width:32ch;text-align:right}
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ---------- LEDGER ---------- */
+  .ledger-wrap{overflow-x:auto;padding:22px 2px 10px;margin:0 -2px}
+  .ledger{display:flex;gap:12px;min-width:min-content}
+  .yc{flex:0 0 148px;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:14px 15px 15px;position:relative;box-shadow:var(--shadow)}
+  .yc .yr{font-family:var(--font-display);font-weight:600;font-size:15px;color:var(--muted);
+    letter-spacing:.06em}
+  .yc .champ{font-family:var(--font-display);font-weight:600;font-size:29px;line-height:1;
+    color:var(--gold-text);margin-top:10px}
+  .yc .cw{font-size:12px;color:var(--ink-2);margin-top:5px;min-height:2.6em}
+  .yc .ru{font-size:12px;color:var(--muted);margin-top:10px;padding-top:9px;
+    border-top:1px solid var(--line)}
+  .yc .ru b{color:var(--ink-2);font-weight:600}
+  .yc.carr{border-color:var(--ring);box-shadow:0 0 0 1px var(--ring),var(--shadow)}
+  .yc.carr::before{content:"◆";position:absolute;top:12px;right:12px;color:var(--gold-bright);
+    font-size:12px}
+  .dynasty-band{display:flex;align-items:center;gap:10px;margin-top:16px;
+    color:var(--gold-text);font-size:12.5px;font-family:var(--font-display);
+    letter-spacing:.06em;text-transform:uppercase}
+  .dynasty-band .l{height:1px;background:linear-gradient(90deg,transparent,var(--gold-text));flex:1}
+  .dynasty-band .r{height:1px;background:linear-gradient(90deg,var(--gold-text),transparent);flex:1}
+
+  /* ---------- BAR CHART ---------- */
+  .bars{margin-top:24px;display:flex;flex-direction:column;gap:11px}
+  .bar-row{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:14px}
+  .bar-row .nm{font-size:14px;color:var(--ink-2);text-align:right;white-space:nowrap}
+  .bar-track{height:26px;background:var(--surface-2);border-radius:5px;position:relative;overflow:hidden}
+  .bar-fill{height:100%;background:var(--gold-bar);border-radius:0 4px 4px 0;width:0;
+    transition:width .9s cubic-bezier(.2,.7,.2,1)}
+  .bar-row .val{font-family:var(--font-display);font-weight:600;font-size:18px;min-width:24px;
+    color:var(--ink)}
+  .bar-row .pods{font-size:12px;color:var(--muted);margin-left:2px}
+
+  /* ---------- TABLE ---------- */
+  .tbl-wrap{overflow-x:auto;margin-top:22px;border:1px solid var(--line);border-radius:12px}
+  table{border-collapse:collapse;width:100%;min-width:640px;background:var(--surface)}
+  thead th{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;
+    font-size:12px;color:var(--muted);font-weight:600;text-align:right;padding:0;
+    border-bottom:1px solid var(--line-strong);background:var(--surface)}
+  thead th button{all:unset;cursor:pointer;display:block;padding:14px 14px;width:100%;
+    box-sizing:border-box;text-align:right}
+  thead th button:focus-visible{outline:2px solid var(--gold-text);outline-offset:-2px}
+  thead th.lft,thead th.lft button{text-align:left}
+  thead th[aria-sort="descending"],thead th[aria-sort="ascending"]{color:var(--gold-text)}
+  thead th .car{opacity:.5;font-size:10px;margin-left:5px}
+  tbody td{padding:12px 14px;text-align:right;font-size:14.5px;border-bottom:1px solid var(--line);
+    color:var(--ink-2)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody td.mgr{text-align:left;color:var(--ink);font-weight:600}
+  tbody tr:hover td{background:var(--surface-2)}
+  .wp-cell{position:relative}
+  .wp-bar{position:absolute;left:0;top:50%;transform:translateY(-50%);height:22px;
+    background:color-mix(in srgb,var(--teal) 20%,transparent);border-radius:4px;z-index:0}
+  .wp-cell span{position:relative;z-index:1;font-family:var(--font-display);font-weight:600;
+    font-size:15px;color:var(--ink)}
+  .rings{color:var(--gold-text);letter-spacing:1px}
+  .rings.zero{color:var(--muted);opacity:.4}
+
+  /* ---------- EXTREMES ---------- */
+  .ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:14px;margin-top:24px}
+  .ex{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;
+    box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .ex .tag{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.12em;
+    font-size:11.5px;color:var(--muted)}
+  .ex .big{font-family:var(--font-display);font-weight:600;font-size:44px;line-height:.95;
+    margin:12px 0 4px;color:var(--gold-text)}
+  .ex.shame .big{color:var(--red)}
+  .ex .who{font-size:15px;color:var(--ink);font-weight:600}
+  .ex .ctx{font-size:13px;color:var(--ink-2);margin-top:5px}
+  .ex.shame::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--red)}
+  .ex.gold::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold-bar)}
+  .donk-list{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:7px}
+  .donk-list li{display:flex;justify-content:space-between;font-size:13.5px;color:var(--ink-2);
+    padding-bottom:7px;border-bottom:1px solid var(--line)}
+  .donk-list li:last-child{border-bottom:none}
+  .donk-list b{color:var(--ink);font-weight:600}
+
+  .trade-card{grid-column:1/-1;display:grid;grid-template-columns:1.1fr 1.4fr;gap:22px;align-items:center}
+  @media(max-width:620px){.trade-card{grid-template-columns:1fr}}
+  .trade-card .spark{width:100%;height:120px}
+
+  /* ---------- DOSSIER ---------- */
+  .pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .pick button{all:unset;cursor:pointer;padding:8px 14px;border:1px solid var(--line-strong);
+    border-radius:999px;font-size:13.5px;color:var(--ink-2);background:var(--surface);
+    display:flex;align-items:center;gap:7px}
+  .pick button:hover{border-color:var(--gold-text);color:var(--ink)}
+  .pick button[aria-pressed="true"]{background:var(--gold-bar);border-color:var(--gold-bar);color:#fff}
+  :root[data-theme="dark"] .pick button[aria-pressed="true"],
+  .pick button[aria-pressed="true"]{color:#1b1305}
+  .pick button:focus-visible{outline:2px solid var(--gold-text);outline-offset:2px}
+  .pick .rc{font-size:10px}
+
+  .dossier{margin-top:24px;background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:24px;display:grid;grid-template-columns:230px 1fr;gap:28px}
+  @media(max-width:720px){.dossier{grid-template-columns:1fr;gap:20px}}
+  .dos-id .name{font-family:var(--font-display);font-weight:600;font-size:40px;line-height:.95}
+  .dos-id .sub{color:var(--muted);font-size:13px;margin-top:4px;text-transform:uppercase;letter-spacing:.08em}
+  .dos-tro{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .tro{font-family:var(--font-display);font-weight:600;font-size:13px;padding:5px 10px;border-radius:7px;
+    background:var(--surface-2);color:var(--ink-2);display:flex;gap:6px;align-items:center}
+  .tro.t{color:var(--gold-text)}
+  .dos-mini{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:18px}
+  .dos-mini div{background:var(--surface);padding:11px 13px}
+  .dos-mini .v{font-family:var(--font-display);font-weight:600;font-size:22px;color:var(--ink)}
+  .dos-mini .k{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:2px}
+  .dos-chart .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+    display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .season-bars{display:flex;align-items:flex-end;gap:5px;height:180px;margin-top:4px}
+  .sb{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;height:100%;
+    position:relative;cursor:default}
+  .sb .fill{width:100%;border-radius:3px 3px 0 0;background:var(--muted);transition:height .7s cubic-bezier(.2,.7,.2,1)}
+  .sb.champ .fill{background:var(--gold-bright)}
+  .sb.podium .fill{background:var(--gold-bar)}
+  .sb.playoff .fill{background:var(--teal)}
+  .sb .yl{font-size:9.5px;color:var(--muted);text-align:center;margin-top:5px;transform:rotate(-90deg) translateX(-2px);
+    transform-origin:center;white-space:nowrap;height:20px}
+  .sb:hover .fill{filter:brightness(1.12)}
+
+  /* tooltip */
+  #tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--page);
+    padding:9px 12px;border-radius:8px;font-size:12.5px;line-height:1.5;box-shadow:var(--shadow);
+    opacity:0;transition:opacity .12s;max-width:220px}
+  #tip.on{opacity:1}
+  #tip b{color:var(--gold-bright)}
+
+  footer{margin-top:70px;padding-top:26px;border-top:1px solid var(--line-strong);
+    color:var(--muted);font-size:12.5px;line-height:1.7}
+  footer b{color:var(--ink-2);font-weight:600}
+  footer .fnote{max-width:70ch}
+
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    .bar-fill,.sb .fill{transition:none}
+  }
+  @media(max-width:640px){
+    .hero-stats{grid-template-columns:repeat(2,1fr)}
+    .chead .note{display:none}
+    .bar-row{grid-template-columns:78px 1fr auto;gap:10px}
+  }
+</style>
+
+<div class="book">
+  <header class="masthead">
+    <button class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme">Theme</button>
+    <div class="crest">
+      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 2l4.8 3.5H31l1.9 5.9 4.8 3.5-1.9 5.9 1.9 5.9-4.8 3.5L31 39.9h-6.2L20 43.4l-4.8-3.5H9l-1.9-5.9L2.3 30.5l1.9-5.9-1.9-5.9 4.8-3.5L9 9.4h6.2z" fill="none" stroke="var(--gold-bar)" stroke-width="1.4" transform="scale(0.9) translate(2 -1)"/>
+        <text x="20" y="26" text-anchor="middle" font-family="var(--font-display)" font-size="18" font-weight="700" fill="var(--gold-text)">17</text>
+      </svg>
+      <span class="eyebrow">The League Archive · Est. 2009</span>
+    </div>
+    <h1>The League<br>Record Book<span class="thin" id="mastSub"></span></h1>
+    <p class="lede" id="lede"></p>
+    <div class="hero-stats" id="heroStats"></div>
+  </header>
+
+  <main>
+    <section class="chapter reveal" id="ledger-sec">
+      <div class="chead">
+        <span class="rn">I</span><h2>The Championship Ledger</h2>
+        <span class="note">Every title and runner-up, 2009 to present. ◆ marks a Carr title.</span>
+      </div>
+      <div class="ledger-wrap"><div class="ledger" id="ledger"></div></div>
+      <div class="dynasty-band"><span class="l"></span><span id="dynastyTxt"></span><span class="r"></span></div>
+    </section>
+
+    <section class="chapter reveal" id="rings-sec">
+      <div class="chead">
+        <span class="rn">II</span><h2>Rings &amp; Podiums</h2>
+        <span class="note">Championships won. Grey figures count total top-3 finishes.</span>
+      </div>
+      <div class="bars" id="titleChart"></div>
+    </section>
+
+    <section class="chapter reveal" id="board-sec">
+      <div class="chead">
+        <span class="rn">III</span><h2>Career Leaderboards</h2>
+        <span class="note">Click any column to re-rank. Regular-season records, all seasons.</span>
+      </div>
+      <div class="tbl-wrap">
+        <table id="board">
+          <thead><tr id="boardHead"></tr></thead>
+          <tbody id="boardBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="chapter reveal" id="ex-sec">
+      <div class="chead">
+        <span class="rn">IV</span><h2>The Extremes</h2>
+        <span class="note">The high-water marks — and the wreckage.</span>
+      </div>
+      <div class="ex-grid" id="extremes"></div>
+    </section>
+
+    <section class="chapter reveal" id="dos-sec">
+      <div class="chead">
+        <span class="rn">V</span><h2>Manager Dossiers</h2>
+        <span class="note">Pick a manager for their full career file.</span>
+      </div>
+      <div class="pick" id="pick"></div>
+      <div class="dossier" id="dossier"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p class="fnote"><b>About the data.</b> Compiled from 17 completed seasons (2009–2025), 198 manager-seasons.
+    The league ran 10 teams through 2011 and 12 teams since 2012.
+    A few honest gaps: four 2009 teams are recorded without a manager name and appear as <b>Unknown</b>;
+    final placements are on record only for 1st through 6th, so missed-playoff seasons are shown as unranked;
+    and trades are logged as a per-season count, not as head-to-head deals. Numbers are exactly as they appear in the league archive.</p>
+  </footer>
+</div>
+
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script>
+const DATA = /*__DATA__*/;
+const $ = (s,r=document)=>r.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const pct=v=>(v*100).toFixed(1);
+const rec=m=>m.wins+'–'+m.losses;
+
+/* ---------- MASTHEAD ---------- */
+const M=DATA.meta;
+$('#mastSub').textContent = `${M.firstYear}–${M.lastYear} · ${M.nSeasons} seasons`;
+const topDog = DATA.managers[0];
+$('#lede').innerHTML = `Seventeen seasons of one fantasy football league, set in stone. `+
+  `<b>${topDog.player}</b> built a dynasty of <b>${topDog.titles} titles</b> — including a four-year reign from 2016 to 2019 — while everyone else fought over the scraps. `+
+  `Here is the permanent record: every ring, every collapse, every donk.`;
+
+const champs = new Set(Object.values(DATA.champByYear));
+const heroStats=[
+  {v:M.nSeasons,k:'Seasons on record',sub:`${M.firstYear}–${M.lastYear}`,gold:false},
+  {v:champs.size,k:'Different champions',sub:`of ${M.nManagers} managers`,gold:false},
+  {v:topDog.titles,k:`${topDog.player}'s rings`,sub:'a lonely dynasty',gold:true},
+  {v:M.nManagerSeasons,k:'Manager-seasons',sub:'logged & counted',gold:false},
+];
+const hs=$('#heroStats');
+heroStats.forEach(s=>{
+  const d=el('div','hstat'+(s.gold?' gold':''));
+  d.innerHTML=`<div class="v num" data-count="${s.v}">0</div><div class="k">${s.k}</div><div class="sub">${s.sub}</div>`;
+  hs.appendChild(d);
+});
+
+/* ---------- LEDGER ---------- */
+const teamOf=(player,year)=>{const m=DATA.managers.find(x=>x.player===player);const h=m&&m.history.find(y=>y.year===year);return h?h.team:'';};
+const led=$('#ledger');
+DATA.years.forEach(y=>{
+  const champ=DATA.champByYear[y]||'—';
+  const ru=DATA.runnerByYear[y]||'—';
+  const isCarr=champ===topDog.player;
+  const c=el('div','yc'+(isCarr?' carr':''));
+  c.innerHTML=`<div class="yr num">${y}</div><div class="champ">${champ}</div>`+
+    `<div class="cw">${teamOf(champ,y)||'&nbsp;'}</div>`+
+    `<div class="ru">runner-up <b>${ru}</b></div>`;
+  led.appendChild(c);
+});
+const carrTitles=topDog.titleYears.join(', ');
+$('#dynastyTxt').textContent = `${topDog.player}’s title years — ${carrTitles}`;
+
+/* ---------- TITLE CHART ---------- */
+const titled=DATA.managers.filter(m=>m.titles>0).sort((a,b)=>b.titles-a.titles||b.podiums-a.podiums);
+const maxT=Math.max(...titled.map(m=>m.titles));
+const tc=$('#titleChart');
+titled.forEach(m=>{
+  const row=el('div','bar-row');
+  row.innerHTML=`<div class="nm">${m.player}</div>`+
+    `<div class="bar-track"><div class="bar-fill" data-w="${m.titles/maxT*100}"></div></div>`+
+    `<div class="val">${m.titles}<span class="pods"> / ${m.podiums} podiums</span></div>`;
+  row.querySelector('.bar-track').addEventListener('mousemove',e=>showTip(e,
+    `<b>${m.player}</b> — ${m.titles} title${m.titles>1?'s':''}<br>${m.titleYears.join(', ')}<br>${m.runnerups} runner-up · ${m.podiums} podium`));
+  row.querySelector('.bar-track').addEventListener('mouseleave',hideTip);
+  tc.appendChild(row);
+});
+
+/* ---------- LEADERBOARD ---------- */
+const cols=[
+  {k:'player',t:'Manager',lft:true,fmt:m=>m.player,def:'asc'},
+  {k:'seasons',t:'Yrs',fmt:m=>m.seasons},
+  {k:'reccol',t:'Record',fmt:m=>rec(m),sortv:m=>m.winpct},
+  {k:'winpct',t:'Win %',fmt:m=>`<div class="wp-cell"><div class="wp-bar" style="width:${pct(m.winpct)}%"></div><span>${pct(m.winpct)}</span></div>`,sortv:m=>m.winpct},
+  {k:'pf',t:'Points For',fmt:m=>Math.round(m.pf).toLocaleString()},
+  {k:'ppg',t:'PPG',fmt:m=>m.ppg.toFixed(1)},
+  {k:'playoffRate',t:'Playoff %',fmt:m=>pct(m.playoffRate)},
+  {k:'titles',t:'Titles',fmt:m=>`<span class="rings${m.titles?'':' zero'}">${m.titles?'◆'.repeat(m.titles):'—'}</span>`,sortv:m=>m.titles},
+];
+let sortK='winpct', sortDir='desc';
+const rankable=DATA.managers.filter(m=>m.player!=='Unknown');
+function renderBoard(){
+  const head=$('#boardHead'); head.innerHTML='';
+  cols.forEach(c=>{
+    const th=el('th',c.lft?'lft':'');
+    const active=c.k===sortK;
+    th.setAttribute('aria-sort',active?(sortDir==='asc'?'ascending':'descending'):'none');
+    const car=active?(sortDir==='asc'?'▲':'▼'):'';
+    th.innerHTML=`<button>${c.t}<span class="car">${car}</span></button>`;
+    th.querySelector('button').addEventListener('click',()=>{
+      if(sortK===c.k){sortDir=sortDir==='asc'?'desc':'asc';}
+      else{sortK=c.k;sortDir=(c.def==='asc')?'asc':'desc';}
+      renderBoard();
+    });
+    head.appendChild(th);
+  });
+  const col=cols.find(c=>c.k===sortK);
+  const val=col.sortv||(m=>m[sortK]);
+  const rows=[...rankable].sort((a,b)=>{
+    const av=val(a),bv=val(b);
+    if(typeof av==='string')return sortDir==='asc'?av.localeCompare(bv):bv.localeCompare(av);
+    return sortDir==='asc'?av-bv:bv-av;
+  });
+  const body=$('#boardBody'); body.innerHTML='';
+  rows.forEach(m=>{
+    const tr=el('tr');
+    cols.forEach(c=>{
+      const td=el('td',c.lft?'mgr':(c.k==='winpct'?'wp-cell-td':''));
+      td.innerHTML=c.fmt(m);
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+}
+renderBoard();
+
+/* ---------- EXTREMES ---------- */
+const S=DATA.superlatives;
+const exCard=(cls,tag,big,who,ctx)=>`<div class="ex ${cls}"><div class="tag">${tag}</div>`+
+  `<div class="big num">${big}</div><div class="who">${who}</div><div class="ctx">${ctx}</div></div>`;
+const exWrap=$('#extremes');
+exWrap.innerHTML =
+  exCard('gold','Highest-scoring season',S.hi_pf.pf.toFixed(0),`${S.hi_pf.player} · ${S.hi_pf.year}`,
+    `“${S.hi_pf.team}” went ${S.hi_pf.wins}–${S.hi_pf.losses}. The most points any team has ever hung in a season.`)+
+  exCard('shame','Lowest-scoring season',S.lo_pf.pf.toFixed(0),`${S.lo_pf.player} · ${S.lo_pf.year}`,
+    `“${S.lo_pf.team}” limped to ${S.lo_pf.wins}–${S.lo_pf.losses}. Nobody has scored less.`)+
+  exCard('gold','Best regular season',`${S.best_rec.wins}–${S.best_rec.losses}`,`${S.best_rec.player} · ${S.best_rec.year}`,
+    `“${S.best_rec.team}” — ${S.best_rec.pf.toFixed(0)} points. The finest regular season on the books.`)+
+  exCard('shame','Worst regular season',`${S.worst_rec.wins}–${S.worst_rec.losses}`,`${S.worst_rec.player} · ${S.worst_rec.year}`,
+    `“${S.worst_rec.team}” — a full season of misery.`)+
+  exCard('gold','Busiest trader, one year',S.most_trades.trades,`${S.most_trades.player} · ${S.most_trades.year}`,
+    `${S.most_trades.trades} trades in a single season — the wheeling-and-dealing record.`)+
+  exCard('','Most roster moves, one year',S.most_moves.moves,`${S.most_moves.player} · ${S.most_moves.year}`,
+    `${S.most_moves.moves} waiver and roster moves. Never stopped tinkering.`);
+
+// Donk wall
+const donkHtml=`<div class="ex shame"><div class="tag">The Donk Wall</div>`+
+  `<div class="big num">${S.donks.length}</div><div class="who">Official last-place donks</div>`+
+  `<ul class="donk-list">`+S.donks.map(d=>`<li><span><b>${d.player}</b> · ${d.year}</span><span>${d.wins}–${d.losses}</span></li>`).join('')+`</ul></div>`;
+exWrap.insertAdjacentHTML('beforeend',donkHtml);
+
+// Trade era spark
+const tt=DATA.tradeTrend;
+const mx=Math.max(...tt.map(d=>d.avg)), W=340,H=110,pad=6;
+const xs=i=>pad+i*(W-2*pad)/(tt.length-1);
+const ys=v=>H-pad-(v/mx)*(H-2*pad);
+let area=`M ${xs(0)} ${H-pad}`; tt.forEach((d,i)=>area+=` L ${xs(i)} ${ys(d.avg)}`); area+=` L ${xs(tt.length-1)} ${H-pad} Z`;
+let line=''; tt.forEach((d,i)=>line+=(i?'L':'M')+` ${xs(i)} ${ys(d.avg)} `);
+const lastD=tt[tt.length-1];
+const tradeCard=el('div','ex trade-card');
+tradeCard.innerHTML=`<div><div class="tag">The Trade Era</div>`+
+  `<div class="big num" style="color:var(--teal)">${lastD.avg.toFixed(1)}</div>`+
+  `<div class="who">trades per team in ${lastD.year}</div>`+
+  `<div class="ctx">The league barely traded for a decade, then caught fire — ${lastD.year} saw more dealing than any season before it, and a first-time champion in ${DATA.champByYear[lastD.year]}.</div></div>`+
+  `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Average trades per team by year, rising sharply in recent seasons">`+
+    `<path d="${area}" fill="color-mix(in srgb,var(--teal) 16%,transparent)"/>`+
+    `<path d="${line}" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linejoin="round"/>`+
+    `<circle cx="${xs(tt.length-1)}" cy="${ys(lastD.avg)}" r="4" fill="var(--teal)"/>`+
+  `</svg>`;
+exWrap.appendChild(tradeCard);
+
+/* ---------- DOSSIER ---------- */
+const pickWrap=$('#pick');
+const dossierMgrs=[...DATA.managers].filter(m=>m.player!=='Unknown').sort((a,b)=>b.titles-a.titles||b.winpct-a.winpct);
+dossierMgrs.forEach(m=>{
+  const b=el('button');
+  b.setAttribute('aria-pressed','false');
+  b.innerHTML=`${m.player}${m.titles?` <span class="rc rings">${'◆'.repeat(m.titles)}</span>`:''}`;
+  b.addEventListener('click',()=>selectMgr(m.player));
+  b.dataset.p=m.player;
+  pickWrap.appendChild(b);
+});
+function selectMgr(p){
+  [...pickWrap.children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===p?'true':'false'));
+  const m=DATA.managers.find(x=>x.player===p);
+  const first=m.history[0].year, last=m.history[m.history.length-1].year;
+  const maxpf=Math.max(...m.history.map(h=>h.pf));
+  const tros=[];
+  if(m.titles)tros.push(`<span class="tro t">◆ ${m.titles} title${m.titles>1?'s':''}</span>`);
+  if(m.runnerups)tros.push(`<span class="tro">${m.runnerups} runner-up</span>`);
+  if(m.podiums)tros.push(`<span class="tro">${m.podiums} podium</span>`);
+  if(m.donks)tros.push(`<span class="tro" style="color:var(--red)">${m.donks} donk</span>`);
+  const bars=m.history.map(h=>{
+    const cls=h.finish===1?'champ':(h.finish&&h.finish<=3?'podium':(h.finish?'playoff':''));
+    const ht=(h.pf/maxpf*100).toFixed(1);
+    const fin=h.finish?(h.finish===1?'🏆 Champion':(h.finish<=3?`Podium (${h.finish})`:`Playoffs (${h.finish})`)):'Missed playoffs';
+    return `<div class="sb ${cls}" data-tip="<b>${h.year} · ${h.team}</b><br>${h.wins}–${h.losses} · ${h.pf.toFixed(0)} PF / ${h.pa.toFixed(0)} PA<br>${fin}">`+
+      `<div class="fill" data-h="${ht}"></div><div class="yl">'${String(h.year).slice(2)}</div></div>`;
+  }).join('');
+  $('#dossier').innerHTML=
+    `<div class="dos-id"><div class="name">${m.player}</div>`+
+    `<div class="sub">${first}–${last} · ${m.seasons} seasons</div>`+
+    `<div class="dos-tro">${tros.join('')||'<span class="tro">no hardware yet</span>'}</div>`+
+    `<div class="dos-mini">`+
+      `<div><div class="v num">${rec(m)}</div><div class="k">Career record</div></div>`+
+      `<div><div class="v num">${pct(m.winpct)}%</div><div class="k">Win rate</div></div>`+
+      `<div><div class="v num">${Math.round(m.pf).toLocaleString()}</div><div class="k">Points for</div></div>`+
+      `<div><div class="v num">${m.playoffs}/${m.seasons}</div><div class="k">Playoff trips</div></div>`+
+    `</div></div>`+
+    `<div class="dos-chart"><div class="lbl"><span>Points for, by season</span>`+
+      `<span class="legend"><span><i style="background:var(--gold-bright)"></i>Champ</span>`+
+      `<span><i style="background:var(--gold-bar)"></i>Podium</span>`+
+      `<span><i style="background:var(--teal)"></i>Playoff</span>`+
+      `<span><i style="background:var(--muted)"></i>Missed</span></span></div>`+
+      `<div class="season-bars">${bars}</div></div>`;
+  requestAnimationFrame(()=>{
+    $('#dossier').querySelectorAll('.sb .fill').forEach(f=>f.style.height=f.dataset.h+'%');
+    $('#dossier').querySelectorAll('.sb').forEach(sb=>{
+      sb.addEventListener('mousemove',e=>showTip(e,sb.dataset.tip));
+      sb.addEventListener('mouseleave',hideTip);
+    });
+  });
+}
+selectMgr(topDog.player);
+
+/* ---------- TOOLTIP ---------- */
+const tip=$('#tip');
+function showTip(e,html){tip.innerHTML=html;tip.classList.add('on');
+  let x=e.clientX+14,y=e.clientY+14;
+  const r=tip.getBoundingClientRect();
+  if(x+r.width>innerWidth-8)x=e.clientX-r.width-14;
+  if(y+r.height>innerHeight-8)y=e.clientY-r.height-14;
+  tip.style.left=x+'px';tip.style.top=y+'px';}
+function hideTip(){tip.classList.remove('on');}
+
+/* ---------- MOTION ---------- */
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const io=new IntersectionObserver((es)=>es.forEach(en=>{
+  if(en.isIntersecting){en.target.classList.add('in');
+    if(en.target.id==='rings-sec')en.target.querySelectorAll('.bar-fill').forEach(f=>f.style.width=f.dataset.w+'%');
+    io.unobserve(en.target);}
+}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(s=>io.observe(s));
+if(reduce){document.querySelectorAll('.bar-fill').forEach(f=>f.style.width=f.dataset.w+'%');}
+
+// count-up hero numbers
+function countUp(node){
+  const target=+node.dataset.count;
+  if(reduce||target>500){node.textContent=target.toLocaleString();return;}
+  let t0=null,dur=900;
+  const step=ts=>{if(!t0)t0=ts;const p=Math.min((ts-t0)/dur,1);
+    node.textContent=Math.round(target*(1-Math.pow(1-p,3)));
+    if(p<1)requestAnimationFrame(step);};
+  requestAnimationFrame(step);
+}
+const hio=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){countUp(en.target);hio.unobserve(en.target);}}),{threshold:.5});
+document.querySelectorAll('.hstat .v').forEach(n=>hio.observe(n));
+
+/* ---------- THEME TOGGLE ---------- */
+$('#themeBtn').addEventListener('click',()=>{
+  const cur=document.documentElement.getAttribute('data-theme');
+  const isDark=cur?cur==='dark':matchMedia('(prefers-color-scheme:dark)').matches;
+  document.documentElement.setAttribute('data-theme',isDark?'light':'dark');
+});
+</script>

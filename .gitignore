@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Preview artifacts
+scripts/_shots/
+scripts/**/_wrap-*.html
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
