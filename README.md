@@ -68,15 +68,17 @@ default branch: it installs deps, runs `build.py`, and deploys `dist/` to
 GitHub Pages. No manual steps after the first push.
 
 Live URL (after the first successful deploy):
-**https://brendanchenry.github.io/fantasy-league-record-book/**
+**https://brendanchenry.github.io/hundo-league-record-book/**
 
 To update the public site: edit `data/league_finish.xlsx` (or the template),
 commit, and `git push`. The Action rebuilds and redeploys in ~1 minute.
 
-> Note: Pages serves a **public** URL even though the repo is private. If the
-> first deploy is blocked because the repo is private on a free plan, make the
-> repo public (`gh repo edit --visibility public`) — the page only contains
-> fantasy nicknames and stats.
+> Note: Pages serves a **public** URL. The page only contains fantasy nicknames
+> and stats. On a free plan the repo must be public for Pages to build.
+>
+> The GitHub repo is named `hundo-league-record-book`; the local working folder
+> may still be `fantasy-league-record-book` (harmless — the git remote is what
+> matters).
 
 ## Known data gaps / roadmap
 
