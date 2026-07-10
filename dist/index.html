@@ -539,6 +539,8 @@ function selectMgr(p){
       `<div><div class="v num">${pct(m.winpct)}%</div><div class="k">Win rate</div></div>`+
       `<div><div class="v num">${Math.round(m.pf).toLocaleString()}</div><div class="k">Points for</div></div>`+
       `<div><div class="v num">${m.playoffs}/${m.seasons}</div><div class="k">Playoff trips</div></div>`+
+      `<div><div class="v num"${m.donks?' style="color:var(--red)"':''}>${m.donks}</div><div class="k">Donks</div></div>`+
+      `<div><div class="v num">${m.trades}</div><div class="k">Career trades</div></div>`+
     `</div></div>`+
     `<div class="dos-chart"><div class="lbl"><span>Points for, by season</span>`+
       `<span class="legend"><span><i style="background:var(--gold-bright)"></i>Champ</span>`+
