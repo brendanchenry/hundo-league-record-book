@@ -107,10 +107,20 @@ def build_payload(seasons: list[dict]) -> dict:
         tradeTrend.append(dict(year=y, avg=round(sum(s["trades"] for s in sub) / len(sub), 2),
                                total=sum(s["trades"] for s in sub)))
 
+    # Donk championships — the last-place "title" race. Count each manager's
+    # donks and the years they earned them; most donks is the Donk Champion.
+    donk_years: dict[str, list[int]] = {}
+    for s in seasons:
+        if s["donk"]:
+            donk_years.setdefault(s["player"], []).append(s["year"])
+    donkChamps = [dict(player=p, donks=len(ys), years=sorted(ys))
+                  for p, ys in donk_years.items()]
+    donkChamps.sort(key=lambda d: (-d["donks"], d["years"][0]))
+
     return dict(
         seasons=seasons, managers=managers, champByYear=champByYear,
         runnerByYear=runnerByYear, years=years, superlatives=superlatives,
-        tradeTrend=tradeTrend,
+        tradeTrend=tradeTrend, donkChamps=donkChamps,
         meta=dict(nSeasons=len(years), firstYear=years[0], lastYear=years[-1],
                   nManagerSeasons=len(seasons),
                   nManagers=len([m for m in managers if m["player"] != "Unknown"])))
