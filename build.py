@@ -98,8 +98,7 @@ def build_payload(seasons: list[dict]) -> dict:
     superlatives = dict(
         hi_pf=best("pf"), lo_pf=best("pf", rev=False),
         best_rec=best_rec, worst_rec=worst_rec,
-        most_trades=best("trades"), most_moves=best("moves"),
-        donks=[s for s in seasons if s["donk"]])
+        most_trades=best("trades"), most_moves=best("moves"))
 
     tradeTrend = []
     for y in years:

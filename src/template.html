@@ -160,12 +160,6 @@
   .ex .ctx{font-size:13px;color:var(--ink-2);margin-top:5px}
   .ex.shame::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--red)}
   .ex.gold::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold-bar)}
-  .donk-list{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:7px}
-  .donk-list li{display:flex;justify-content:space-between;font-size:13.5px;color:var(--ink-2);
-    padding-bottom:7px;border-bottom:1px solid var(--line)}
-  .donk-list li:last-child{border-bottom:none}
-  .donk-list b{color:var(--ink);font-weight:600}
-
   .trade-card{grid-column:1/-1;display:grid;grid-template-columns:1.1fr 1.4fr;gap:22px;align-items:center}
   @media(max-width:620px){.trade-card{grid-template-columns:1fr}}
   .trade-card .spark{width:100%;height:120px}
@@ -309,8 +303,8 @@
 
     <section class="chapter reveal" id="donk-sec">
       <div class="chead">
-        <span class="rn">V</span><h2>Donk Championships</h2>
-        <span class="note">The other title race — last place, and the men who own it. Most donks takes the crown.</span>
+        <span class="rn">V</span><h2>King of Donks</h2>
+        <span class="note">The donk goes to whoever loses the loser's bracket — the crown nobody wants. These are the men who've worn it most.</span>
       </div>
       <div class="donk-champ" id="donkChamps"></div>
     </section>
@@ -463,12 +457,6 @@ exWrap.innerHTML =
   exCard('','Most roster moves, one year',S.most_moves.moves,`${S.most_moves.player} · ${S.most_moves.year}`,
     `${S.most_moves.moves} waiver and roster moves. Never stopped tinkering.`);
 
-// Donk wall
-const donkHtml=`<div class="ex shame"><div class="tag">The Donk Wall</div>`+
-  `<div class="big num">${S.donks.length}</div><div class="who">Official last-place donks</div>`+
-  `<ul class="donk-list">`+S.donks.map(d=>`<li><span><b>${d.player}</b> · ${d.year}</span><span>${d.wins}–${d.losses}</span></li>`).join('')+`</ul></div>`;
-exWrap.insertAdjacentHTML('beforeend',donkHtml);
-
 // Trade era spark
 const tt=DATA.tradeTrend;
 const mx=Math.max(...tt.map(d=>d.avg)), W=340,H=110,pad=6;
@@ -495,11 +483,11 @@ const donkWrap=$('#donkChamps');
 if(dc.length){
   const maxDonk=dc[0].donks, champ=dc[0];
   donkWrap.innerHTML=
-    `<div class="donk-crown"><div class="em">💩</div>`+
-    `<div><div class="lbl">Reigning Donk Champion</div>`+
+    `<div class="donk-crown"><div class="em">👑💩</div>`+
+    `<div><div class="lbl">The Donk King</div>`+
     `<div class="who">${champ.player}</div>`+
-    `<div class="sub">Dead last in ${champ.years.join(', ')}.</div></div>`+
-    `<div class="cnt"><b>${champ.donks}</b><span>donk titles</span></div></div>`+
+    `<div class="sub">Donked in ${champ.years.join(', ')}.</div></div>`+
+    `<div class="cnt"><b>${champ.donks}</b><span>donk crowns</span></div></div>`+
     `<div class="donk-bars" id="donkBars"></div>`;
   const db=$('#donkBars');
   dc.forEach(d=>{
