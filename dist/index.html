@@ -182,6 +182,30 @@
   .donk-bars .yrs{font-size:12px;color:var(--muted);margin-left:2px;font-family:var(--font-body)}
   @media(max-width:620px){.donk-crown{gap:12px;padding:16px}.donk-crown .who{font-size:20px}}
 
+  /* ---------- ASK THE ARCHIVE ---------- */
+  .ask{margin-top:24px;background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:22px}
+  .ask-input{width:100%;box-sizing:border-box;resize:vertical;min-height:66px;
+    background:var(--surface-2);border:1px solid var(--line-strong);border-radius:10px;
+    padding:13px 15px;color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5}
+  .ask-input::placeholder{color:var(--muted)}
+  .ask-input:focus{outline:2px solid var(--gold-text);outline-offset:1px;border-color:var(--gold-text)}
+  .ask-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .ask-chip{all:unset;cursor:pointer;padding:7px 12px;border:1px solid var(--line-strong);
+    border-radius:999px;font-size:12.5px;color:var(--ink-2);background:var(--surface)}
+  .ask-chip:hover{border-color:var(--gold-text);color:var(--ink)}
+  .ask-chip:focus-visible{outline:2px solid var(--gold-text);outline-offset:2px}
+  .ask-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}
+  .ask-btn{all:unset;cursor:pointer;padding:10px 16px;border-radius:9px;font-family:var(--font-display);
+    font-weight:600;font-size:14px;border:1px solid var(--line-strong);color:var(--ink);background:var(--surface)}
+  .ask-btn:hover{border-color:var(--gold-text)}
+  .ask-btn.primary{background:var(--gold-bar);border-color:var(--gold-bar);color:#1b1305}
+  .ask-btn.primary:hover{filter:brightness(1.06)}
+  .ask-btn.ghost{color:var(--ink-2)}
+  .ask-btn:focus-visible{outline:2px solid var(--gold-text);outline-offset:2px}
+  .ask-msg{font-size:13px;color:var(--teal);font-weight:600}
+  .ask-fine{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.5}
+
   /* ---------- DOSSIER ---------- */
   .pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
   .pick button{all:unset;cursor:pointer;padding:8px 14px;border:1px solid var(--line-strong);
@@ -316,6 +340,24 @@
       </div>
       <div class="pick" id="pick"></div>
       <div class="dossier" id="dossier"></div>
+    </section>
+
+    <section class="chapter reveal" id="ask-sec">
+      <div class="chead">
+        <span class="rn">VII</span><h2>Ask the Archive</h2>
+        <span class="note">Have your own AI dig through the numbers. Your account, your dime — the whole dataset comes prewired into the prompt.</span>
+      </div>
+      <div class="ask">
+        <textarea id="askQ" class="ask-input" rows="3" placeholder="Ask anything… e.g. Who has the best playoff win rate? Which manager bounces back hardest after a donk?"></textarea>
+        <div class="ask-chips" id="askChips"></div>
+        <div class="ask-actions">
+          <button id="askClaude" class="ask-btn primary" type="button">Ask in Claude ↗</button>
+          <button id="askGpt" class="ask-btn" type="button">Ask in ChatGPT ↗</button>
+          <button id="askCopy" class="ask-btn ghost" type="button">Copy prompt</button>
+          <span class="ask-msg" id="askMsg" role="status" aria-live="polite"></span>
+        </div>
+        <p class="ask-fine">Nothing is sent from this page. Clicking copies a ready-made prompt — your question plus the full league dataset — to your clipboard and opens the chat in a new tab. Paste it in (Ctrl/⌘+V) and hit enter.</p>
+      </div>
     </section>
   </main>
 
@@ -557,6 +599,61 @@ function selectMgr(p){
   });
 }
 selectMgr(topDog.player);
+
+/* ---------- ASK THE ARCHIVE ---------- */
+const askData=JSON.stringify(DATA.seasons);
+const askExamples=[
+  "Who has the best playoff win rate?",
+  "Rank every manager by titles, then career win %.",
+  "Which manager scored the most points but won the fewest titles?",
+  "Who bounces back best the season after taking a donk?",
+  "Which season was the biggest overachiever — good finish on low points?"
+];
+const askChips=$('#askChips');
+askExamples.forEach(q=>{
+  const c=el('button','ask-chip'); c.type='button'; c.textContent=q;
+  c.addEventListener('click',()=>{const t=$('#askQ');t.value=q;t.focus();});
+  askChips.appendChild(c);
+});
+function buildPrompt(){
+  const q=($('#askQ').value||'').trim()||'Give me three surprising insights from this data, with the numbers behind each.';
+  return `You are a fantasy football historian for the Hundo League (2009–2025). `+
+    `Below is the complete record — one row per manager-season.\n\n`+
+    `Field legend:\n`+
+    `- player, team, year\n`+
+    `- wins, losses: regular-season record\n`+
+    `- pf, pa: points for / against (season totals)\n`+
+    `- draft: draft slot (may be null)\n`+
+    `- finish: final placement, recorded for 1st–6th only — 1=champion, 2=runner-up, 3=third; null=missed the playoffs\n`+
+    `- moves: waiver/roster moves that season; trades: trades that season\n`+
+    `- donk: true if this manager took the last-place "donk" punishment (lost the loser's bracket)\n\n`+
+    `DATA (JSON):\n${askData}\n\n`+
+    `Using only the data above, answer:\n${q}\n\n`+
+    `Show the numbers behind your answer and cite specific managers, teams, and years.`;
+}
+async function copyPrompt(){
+  const text=buildPrompt();
+  try{await navigator.clipboard.writeText(text);return true;}
+  catch(e){
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    let ok=false;try{ok=document.execCommand('copy');}catch(_){}
+    ta.remove();return ok;
+  }
+}
+function askMsg(t){const m=$('#askMsg');m.textContent=t;clearTimeout(m._t);m._t=setTimeout(()=>{m.textContent='';},8000);}
+async function handoff(url,name){
+  const ok=await copyPrompt();
+  askMsg(ok?`Prompt copied — opening ${name}. Paste (Ctrl/⌘+V) and hit enter.`
+           :`Couldn't auto-copy — use “Copy prompt”, then paste into ${name}.`);
+  if(url)window.open(url,'_blank','noopener');
+}
+$('#askClaude').addEventListener('click',()=>handoff('https://claude.ai/new','Claude'));
+$('#askGpt').addEventListener('click',()=>handoff('https://chatgpt.com/','ChatGPT'));
+$('#askCopy').addEventListener('click',async()=>{
+  const ok=await copyPrompt();
+  askMsg(ok?'Prompt copied — paste it into any AI chat and hit enter.':'Copy failed — your browser blocked clipboard access.');
+});
 
 /* ---------- TOOLTIP ---------- */
 const tip=$('#tip');
