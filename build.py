@@ -26,6 +26,20 @@ OUT = ROOT / "dist" / "index.html"
 # and "Will Fuller" count as the same guy.
 _SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
 
+# Team defenses are drafted under their nickname; label them so e.g. "Commanders"
+# reads as a D/ST, not a player.
+_DEF_TEAMS = {
+    "49ers", "Bears", "Bengals", "Bills", "Broncos", "Browns", "Buccaneers",
+    "Cardinals", "Chargers", "Chiefs", "Colts", "Commanders", "Cowboys",
+    "Dolphins", "Eagles", "Falcons", "Giants", "Jaguars", "Jets", "Lions",
+    "Packers", "Panthers", "Patriots", "Raiders", "Rams", "Ravens", "Saints",
+    "Seahawks", "Steelers", "Texans", "Titans", "Vikings",
+}
+
+
+def label_pick(name: str) -> str:
+    return f"{name} defense" if name in _DEF_TEAMS else name
+
 
 def norm_name(n: str) -> str:
     parts = str(n).strip().split()
@@ -101,7 +115,8 @@ def build_draft(picks: list[dict], seasons: list[dict]) -> dict:
         if cur is None or c > cur[1] or (c == cur[1] and pl < cur[0]):
             by_mgr[mgr] = (pl, c)
     crushes = sorted(
-        (dict(manager=m, player=pl, count=c) for m, (pl, c) in by_mgr.items() if c >= 3),
+        (dict(manager=m, player=label_pick(pl), count=c)
+         for m, (pl, c) in by_mgr.items() if c >= 3),
         key=lambda d: (-d["count"], d["manager"]))
 
     return dict(firstOverall=firstOverall, crushes=crushes, meta=meta)

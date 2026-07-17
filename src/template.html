@@ -327,20 +327,23 @@
   }
 
   /* ---------- TABS ---------- */
-  .tabs{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;gap:6px;
-    padding:12px 0 11px;margin-bottom:10px;background:var(--page);border-bottom:1px solid var(--line-strong)}
-  .tabs button{all:unset;cursor:pointer;padding:9px 16px;border-radius:999px;font-family:var(--font-display);
-    font-weight:600;font-size:14px;color:var(--ink-2);border:1px solid transparent;white-space:nowrap;
-    display:flex;align-items:center;gap:7px}
-  .tabs button:hover{color:var(--ink)}
-  .tabs button[aria-selected="true"]{background:var(--surface-2);color:var(--ink);border-color:var(--line-strong)}
+  .tabs{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+    padding:13px 0;margin:16px 0 26px;background:var(--page);
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line-strong);
+    box-shadow:0 10px 22px -16px rgba(0,0,0,.6)}
+  .tabs .lead{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.11em;
+    font-size:11px;color:var(--muted);margin-right:3px}
+  .tabs button{all:unset;cursor:pointer;padding:10px 17px;border-radius:999px;font-family:var(--font-display);
+    font-weight:600;font-size:14px;color:var(--ink-2);background:var(--surface-2);
+    border:1px solid var(--line);white-space:nowrap}
+  .tabs button:hover{color:var(--ink);border-color:var(--line-strong)}
+  .tabs button[aria-selected="true"]{background:var(--gold-bar);color:#1b1305;border-color:var(--gold-bar)}
   .tabs button:focus-visible{outline:2px solid var(--gold-text);outline-offset:2px}
-  .tabs .tc{font-family:var(--font-body);font-size:11px;color:var(--muted);font-weight:600}
   .chapter[hidden]{display:none}
   @media(max-width:640px){
-    .tabs{gap:5px;padding:9px 0;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
-    .tabs button{padding:8px 13px;font-size:13px;flex-shrink:0}
-    .tabs .tc{display:none}
+    .tabs{gap:6px;padding:11px 0;margin:12px 0 20px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .tabs .lead{display:none}
+    .tabs button{padding:9px 14px;font-size:13px;flex-shrink:0}
   }
 </style>
 
@@ -361,6 +364,7 @@
 
   <main>
     <nav class="tabs" id="tabs" role="tablist" aria-label="Record book sections">
+      <span class="lead" aria-hidden="true">Explore</span>
       <button role="tab" data-tab="champions" aria-selected="true">Champions</button>
       <button role="tab" data-tab="records" aria-selected="false">Records</button>
       <button role="tab" data-tab="donks" aria-selected="false">Donks &amp; Redemption</button>
