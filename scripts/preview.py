@@ -46,7 +46,9 @@ def wrap(theme: str) -> str:
     # shows real content (these animate on a live scroll).
     force = (
         "<style>*{transition:none!important;animation:none!important}"
-        ".reveal{opacity:1!important;transform:none!important}</style>"
+        ".reveal{opacity:1!important;transform:none!important}"
+        # Tabs hide all but the active group; unhide everything for a full-page shot.
+        ".chapter[hidden]{display:block!important}.tabs{display:none!important}</style>"
         "<script>window.addEventListener('load',()=>{setTimeout(()=>{"
         "document.querySelectorAll('.reveal').forEach(e=>e.classList.add('in'));"
         "document.querySelectorAll('.bar-fill').forEach(f=>f.style.width=f.dataset.w+'%');"

@@ -237,6 +237,29 @@
   .draft-viz{margin-top:28px}
   .draft-viz .bars{margin-top:14px}
 
+  /* ---------- THE DRAFT ---------- */
+  .col-h.gold{color:var(--gold-text)}
+  .curse-banner{margin-top:22px;display:flex;align-items:center;gap:18px;padding:18px 22px;
+    background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--red);
+    border-radius:12px;box-shadow:var(--shadow)}
+  .curse-banner .em{font-size:34px;line-height:1;flex-shrink:0}
+  .curse-banner .txt{font-size:14px;color:var(--ink-2);line-height:1.55;max-width:60ch}
+  .curse-banner .txt b{color:var(--ink);font-weight:600}
+  .curse-banner .cnt{margin-left:auto;text-align:right;flex-shrink:0}
+  .curse-banner .cnt b{font-family:var(--font-display);font-weight:600;font-size:44px;color:var(--red);line-height:.9;display:block}
+  .curse-banner .cnt span{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);line-height:1.4}
+  @media(max-width:620px){.curse-banner{flex-wrap:wrap;gap:12px;padding:16px}.curse-banner .cnt{margin-left:0;text-align:left}}
+  .fo-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:8px;margin-top:16px}
+  .fo-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);
+    border-radius:9px;padding:9px 13px}
+  .fo-row .yr{font-family:var(--font-display);font-weight:600;color:var(--muted);width:26px;flex-shrink:0;font-size:13px}
+  .fo-row .pl{flex:1;color:var(--ink);font-weight:600;font-size:13.5px;line-height:1.25}
+  .fo-row .pl span{display:block;font-weight:400;font-size:11.5px;color:var(--muted)}
+  .fo-row .out{font-size:11.5px;font-weight:600;white-space:nowrap;text-align:right}
+  .fo-row .out.win{color:var(--gold-text)}
+  .fo-row .out.miss{color:var(--red)}
+  .fo-row .out.mid{color:var(--ink-2)}
+
   /* ---------- DOSSIER ---------- */
   .pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
   .pick button{all:unset;cursor:pointer;padding:8px 14px;border:1px solid var(--line-strong);
@@ -300,6 +323,23 @@
     .chead .note{display:none}
     .bar-row{grid-template-columns:78px 1fr auto;gap:10px}
   }
+
+  /* ---------- TABS ---------- */
+  .tabs{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;gap:6px;
+    padding:12px 0 11px;margin-bottom:10px;background:var(--page);border-bottom:1px solid var(--line-strong)}
+  .tabs button{all:unset;cursor:pointer;padding:9px 16px;border-radius:999px;font-family:var(--font-display);
+    font-weight:600;font-size:14px;color:var(--ink-2);border:1px solid transparent;white-space:nowrap;
+    display:flex;align-items:center;gap:7px}
+  .tabs button:hover{color:var(--ink)}
+  .tabs button[aria-selected="true"]{background:var(--surface-2);color:var(--ink);border-color:var(--line-strong)}
+  .tabs button:focus-visible{outline:2px solid var(--gold-text);outline-offset:2px}
+  .tabs .tc{font-family:var(--font-body);font-size:11px;color:var(--muted);font-weight:600}
+  .chapter[hidden]{display:none}
+  @media(max-width:640px){
+    .tabs{gap:5px;padding:9px 0;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+    .tabs button{padding:8px 13px;font-size:13px;flex-shrink:0}
+    .tabs .tc{display:none}
+  }
 </style>
 
 <div class="book">
@@ -318,7 +358,15 @@
   </header>
 
   <main>
-    <section class="chapter reveal" id="ledger-sec">
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Record book sections">
+      <button role="tab" data-tab="champions" aria-selected="true">Champions</button>
+      <button role="tab" data-tab="records" aria-selected="false">Records</button>
+      <button role="tab" data-tab="donks" aria-selected="false">Donks &amp; Redemption</button>
+      <button role="tab" data-tab="draft" aria-selected="false">The Draft</button>
+      <button role="tab" data-tab="managers" aria-selected="false">Managers</button>
+      <button role="tab" data-tab="ask" aria-selected="false">Ask</button>
+    </nav>
+    <section class="chapter reveal" data-group="champions" id="ledger-sec">
       <div class="chead">
         <span class="rn">I</span><h2>The Championship Ledger</h2>
         <span class="note">Every title and runner-up, 2009 to present. ◆ marks a Carr title.</span>
@@ -327,7 +375,7 @@
       <div class="dynasty-band"><span class="l"></span><span id="dynastyTxt"></span><span class="r"></span></div>
     </section>
 
-    <section class="chapter reveal" id="rings-sec">
+    <section class="chapter reveal" data-group="champions" id="rings-sec">
       <div class="chead">
         <span class="rn">II</span><h2>Rings &amp; Podiums</h2>
         <span class="note">Championships won. Grey figures count total top-3 finishes.</span>
@@ -335,9 +383,9 @@
       <div class="bars" id="titleChart"></div>
     </section>
 
-    <section class="chapter reveal" id="board-sec">
+    <section class="chapter reveal" data-group="records" id="board-sec">
       <div class="chead">
-        <span class="rn">III</span><h2>Career Leaderboards</h2>
+        <span class="rn">IV</span><h2>Career Leaderboards</h2>
         <span class="note">Click any column to re-rank. Regular-season records, all seasons.</span>
       </div>
       <div class="tbl-wrap">
@@ -348,17 +396,17 @@
       </div>
     </section>
 
-    <section class="chapter reveal" id="ex-sec">
+    <section class="chapter reveal" data-group="records" id="ex-sec">
       <div class="chead">
-        <span class="rn">IV</span><h2>The Extremes</h2>
+        <span class="rn">V</span><h2>The Extremes</h2>
         <span class="note">The high-water marks — and the wreckage.</span>
       </div>
       <div class="ex-grid" id="extremes"></div>
     </section>
 
-    <section class="chapter reveal" id="luck-sec">
+    <section class="chapter reveal" data-group="records" id="luck-sec">
       <div class="chead">
-        <span class="rn">V</span><h2>The Luck Lens</h2>
+        <span class="rn">VI</span><h2>The Luck Lens</h2>
         <span class="note">Scoreboard justice — and the lack of it. Seasons are ranked by scoring <em>within their own year</em>, so a 10-team era and a 12-team era compare fairly.</span>
       </div>
       <div class="two-col">
@@ -367,32 +415,32 @@
       </div>
     </section>
 
-    <section class="chapter reveal" id="donk-sec">
+    <section class="chapter reveal" data-group="donks" id="donk-sec">
       <div class="chead">
-        <span class="rn">VI</span><h2>King of Donks</h2>
+        <span class="rn">VII</span><h2>King of Donks</h2>
         <span class="note">The donk goes to whoever loses the loser's bracket — the crown nobody wants. These are the men who've worn it most.</span>
       </div>
       <div class="donk-champ" id="donkChamps"></div>
     </section>
 
-    <section class="chapter reveal" id="redeem-sec">
+    <section class="chapter reveal" data-group="donks" id="redeem-sec">
       <div class="chead">
-        <span class="rn">VII</span><h2>Redemption Arcs</h2>
+        <span class="rn">VIII</span><h2>Redemption Arcs</h2>
         <span class="note">The donk is not a life sentence. These managers climbed straight from the loser's bracket to the podium — one of them the very next season.</span>
       </div>
       <div class="arc-list" id="redeem"></div>
     </section>
 
-    <section class="chapter reveal" id="cindy-sec">
+    <section class="chapter reveal" data-group="champions" id="cindy-sec">
       <div class="chead">
-        <span class="rn">VIII</span><h2>Cinderella Champions</h2>
+        <span class="rn">III</span><h2>Cinderella Champions</h2>
         <span class="note">A ring never required the best regular season — just the hottest month. The flimsiest title runs on record, and where champions were drafted.</span>
       </div>
       <div class="ex-grid" id="cindy"></div>
       <div class="draft-viz"><div class="col-h">Where champions were drafted — the slot barely matters</div><div class="bars" id="draftBars"></div></div>
     </section>
 
-    <section class="chapter reveal" id="miss-sec">
+    <section class="chapter reveal" data-group="donks" id="miss-sec">
       <div class="chead">
         <span class="rn">IX</span><h2>The Near-Miss Club</h2>
         <span class="note">So close, so often. Podium finishes that never became a ring — and, for those who do own one, the longest waits to win again.</span>
@@ -403,18 +451,34 @@
       </div>
     </section>
 
-    <section class="chapter reveal" id="dos-sec">
+    <section class="chapter reveal" data-group="draft" id="draft-sec">
       <div class="chead">
-        <span class="rn">X</span><h2>Manager Dossiers</h2>
+        <span class="rn">X</span><h2>The Draft</h2>
+        <span class="note">Sixteen years of draft boards (2010–2025). Who the whole league covets, who each manager can't quit — and the curse of the first pick.</span>
+      </div>
+      <div class="curse-banner"><div class="em">🎯</div>
+        <div class="txt" id="curseTxt"></div>
+        <div class="cnt"><b id="curseCnt"></b><span>of <em id="curseN"></em> first picks<br>missed the playoffs</span></div>
+      </div>
+      <div class="fo-list" id="foList"></div>
+      <div class="two-col" style="margin-top:34px">
+        <div><div class="col-h gold">Your Guy — the pick each manager keeps making</div><ul class="rlist" id="crushes"></ul></div>
+        <div><div class="col-h">League darlings — most-drafted, all time</div><ul class="rlist" id="darlings"></ul></div>
+      </div>
+    </section>
+
+    <section class="chapter reveal" data-group="managers" id="dos-sec">
+      <div class="chead">
+        <span class="rn">XI</span><h2>Manager Dossiers</h2>
         <span class="note">Pick a manager for their full career file.</span>
       </div>
       <div class="pick" id="pick"></div>
       <div class="dossier" id="dossier"></div>
     </section>
 
-    <section class="chapter reveal" id="ask-sec">
+    <section class="chapter reveal" data-group="ask" id="ask-sec">
       <div class="chead">
-        <span class="rn">XI</span><h2>Ask the Archive</h2>
+        <span class="rn">XII</span><h2>Ask the Archive</h2>
         <span class="note">Have your own AI dig through the numbers. Your account, your dime — the whole dataset comes prewired into the prompt.</span>
       </div>
       <div class="ask">
@@ -665,6 +729,36 @@ $('#droughts').innerHTML=DATA.droughts.map(d=>{
     `<span class="meta"><b class="${cls}">${d.drought}</b>year${d.drought===1?'':'s'} dry</span></li>`;
 }).join('');
 
+/* ---------- THE DRAFT ---------- */
+const DR=DATA.draft, dmeta=DR.meta;
+$('#curseCnt').textContent=dmeta.missed;
+$('#curseN').textContent=dmeta.n;
+$('#curseTxt').innerHTML=
+  `In ${dmeta.n} years, exactly <b>one</b> first-overall pick has won the title `+
+  `(Carr, 2018). ${dmeta.streak>1?`A brutal <b>${dmeta.streak}-year drought</b> ran from ${dmeta.streakStart}–${dmeta.streakEnd}. `:''}`+
+  `<b>${dmeta.topName}</b> was the first name off the board <b>${dmeta.topCount} times</b> — ${dmeta.topMissed} of them missed the playoffs.`;
+function foOutcome(f){
+  if(f===1)return['win','🏆 Champion'];
+  if(f===2)return['mid','🥈 Runner-up'];
+  if(f===3)return['mid','🥉 Third'];
+  if(f==null)return['miss','✗ Missed playoffs'];
+  return['mid',`Finish ${f}`];
+}
+$('#foList').innerHTML=DR.firstOverall.map(d=>{
+  const [c,t]=foOutcome(d.finish);
+  return `<div class="fo-row"><span class="yr">'${String(d.year).slice(2)}</span>`+
+    `<span class="pl">${d.player}<span>${d.manager}</span></span>`+
+    `<span class="out ${c}">${t}</span></div>`;
+}).join('');
+$('#crushes').innerHTML=DR.crushes.map(d=>
+  `<li><span class="who">${d.manager}<span class="tm">can't stop drafting ${d.player}</span></span>`+
+  `<span class="meta"><b class="gold">${d.count}×</b>drafted</span></li>`
+).join('');
+$('#darlings').innerHTML=DR.darlings.map((d,i)=>
+  `<li><span class="who">${d.player}<span class="tm">${i===0?'the most-drafted man in league history':'a perennial draft-day favorite'}</span></span>`+
+  `<span class="meta"><b>${d.count}×</b>drafted</span></li>`
+).join('');
+
 /* ---------- DOSSIER ---------- */
 const pickWrap=$('#pick');
 const dossierMgrs=[...DATA.managers].filter(m=>m.player!=='Unknown').sort((a,b)=>b.titles-a.titles||b.winpct-a.winpct);
@@ -786,15 +880,29 @@ function showTip(e,html){tip.innerHTML=html;tip.classList.add('on');
   tip.style.left=x+'px';tip.style.top=y+'px';}
 function hideTip(){tip.classList.remove('on');}
 
-/* ---------- MOTION ---------- */
+/* ---------- TABS + MOTION ---------- */
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
-const io=new IntersectionObserver((es)=>es.forEach(en=>{
-  if(en.isIntersecting){en.target.classList.add('in');
-    en.target.querySelectorAll('.bar-fill').forEach(f=>f.style.width=f.dataset.w+'%');
-    io.unobserve(en.target);}
-}),{threshold:.12});
-document.querySelectorAll('.reveal').forEach(s=>io.observe(s));
-if(reduce){document.querySelectorAll('.bar-fill').forEach(f=>f.style.width=f.dataset.w+'%');}
+const tabBtns=[...document.querySelectorAll('#tabs button')];
+const chapters=[...document.querySelectorAll('.chapter')];
+function revealSection(sec){
+  sec.classList.add('in');
+  sec.querySelectorAll('.bar-fill').forEach(f=>f.style.width=f.dataset.w+'%');
+}
+function setHash(tab){try{history.replaceState(null,'',tab==='champions'?location.pathname+location.search:'#'+tab);}catch(_){}}
+function showTab(group,scroll){
+  tabBtns.forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===group?'true':'false'));
+  chapters.forEach(sec=>{const on=sec.dataset.group===group;sec.hidden=!on;if(on)revealSection(sec);});
+  if(scroll){$('#tabs').scrollIntoView({block:'start',behavior:reduce?'auto':'smooth'});}
+}
+tabBtns.forEach(b=>b.addEventListener('click',()=>{showTab(b.dataset.tab,true);setHash(b.dataset.tab);}));
+$('#tabs').addEventListener('keydown',e=>{
+  const i=tabBtns.indexOf(document.activeElement); if(i<0)return;
+  if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();
+    const n=(i+(e.key==='ArrowRight'?1:tabBtns.length-1))%tabBtns.length;
+    tabBtns[n].focus(); showTab(tabBtns[n].dataset.tab,false); setHash(tabBtns[n].dataset.tab);}
+});
+const initTab=(location.hash||'').slice(1);
+showTab(tabBtns.some(b=>b.dataset.tab===initTab)?initTab:'champions',false);
 
 // count-up hero numbers
 function countUp(node){

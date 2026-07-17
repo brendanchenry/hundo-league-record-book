@@ -32,11 +32,18 @@ crash with a `cp1252` `UnicodeEncodeError`. Prefix with `PYTHONIOENCODING=utf-8`
 The whole app is a data-injection pipeline across three files that **move
 together**:
 
-1. **`data/league_finish.xlsx`** — the single source of truth, one row per
-   manager-season. Columns: `Player, Team Name, Wins, Losses, Points for,
-   Points Against, Draft Position, Year, Finish, Moves, Trades, Donk`.
-   Note the real header is `Finish ` (trailing space); `build.py` strips all
-   headers on load, so don't "fix" the sheet to match code — the code adapts.
+1. **`data/league_finish.xlsx`** — the single source of truth, with two sheets:
+   - **`League_Summary`** — one row per manager-season. Columns: `Player,
+     Team Name, Wins, Losses, Points for, Points Against, Draft Position, Year,
+     Finish, Moves, Trades, Donk`. Note the real header is `Finish ` (trailing
+     space); `build.py` strips all headers on load, so don't "fix" the sheet to
+     match code — the code adapts.
+   - **`Draft_Results`** — the full draft board, one row per pick (`season,
+     overall_pick, round, pick, player_name, team_name, manager`). No player
+     position or fantasy-points column, so draft *value/grades* aren't derivable
+     yet; drives the "The Draft" chapter (first-overall curse, draft crushes,
+     league darlings). Player names are normalized (generational suffixes
+     stripped) so "Will Fuller V" and "Will Fuller" group together.
 2. **`build.py`** — reads the Excel, computes **every** stat in Python (career
    records, titles/podiums, leaderboards, extremes, per-manager histories,
    trade trend, donk championships), serializes it all into one compact JSON

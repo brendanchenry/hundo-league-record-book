@@ -12,6 +12,7 @@ new season) and re-run this script to regenerate the page. Then re-publish
 dist/index.html as the artifact.
 """
 import json
+from collections import Counter
 from pathlib import Path
 
 import pandas as pd
@@ -21,9 +22,20 @@ DATA_XLSX = ROOT / "data" / "league_finish.xlsx"
 TEMPLATE = ROOT / "src" / "template.html"
 OUT = ROOT / "dist" / "index.html"
 
+# Generational suffixes stripped when grouping draft picks, so "Will Fuller V"
+# and "Will Fuller" count as the same guy.
+_SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+
+def norm_name(n: str) -> str:
+    parts = str(n).strip().split()
+    if len(parts) > 1 and parts[-1].lower().strip(".") in _SUFFIXES:
+        parts = parts[:-1]
+    return " ".join(parts)
+
 
 def load_seasons(path: Path) -> list[dict]:
-    df = pd.read_excel(path)
+    df = pd.read_excel(path, sheet_name="League_Summary")
     df.columns = [c.strip() for c in df.columns]
     df["Player"] = df["Player"].fillna("Unknown")
     seasons = []
@@ -38,6 +50,65 @@ def load_seasons(path: Path) -> list[dict]:
             moves=int(r["Moves"]), trades=int(r["Trades"]),
             donk=(r["Donk"] == "Yes")))
     return seasons
+
+
+def load_draft(path: Path) -> list[dict]:
+    df = pd.read_excel(path, sheet_name="Draft_Results")
+    df.columns = [c.strip() for c in df.columns]
+    picks = []
+    for _, r in df.iterrows():
+        picks.append(dict(
+            season=int(r["season"]), overall=int(r["overall_pick"]),
+            round=int(r["round"]), pick=int(r["pick"]),
+            player=str(r["player_name"]).strip(), manager=str(r["manager"]).strip()))
+    return picks
+
+
+def build_draft(picks: list[dict], seasons: list[dict]) -> dict:
+    finish_by = {(s["player"], s["year"]): s["finish"] for s in seasons}
+
+    # First-overall curse — each year's #1 pick and how that manager finished.
+    firstOverall = sorted(
+        (dict(year=p["season"], manager=p["manager"], player=p["player"],
+              finish=finish_by.get((p["manager"], p["season"])))
+         for p in picks if p["overall"] == 1),
+        key=lambda d: d["year"])
+    titles = sum(1 for d in firstOverall if d["finish"] == 1)
+    missed = sum(1 for d in firstOverall if d["finish"] is None)
+    # Longest run of consecutive years the #1 pick missed the playoffs (the boards
+    # are one per year with no gaps, so index adjacency is year adjacency).
+    longest = cur = 0
+    best_end = -1
+    for i, d in enumerate(firstOverall):
+        cur = cur + 1 if d["finish"] is None else 0
+        if cur > longest:
+            longest, best_end = cur, i
+    streakStart = firstOverall[best_end - longest + 1]["year"] if longest else None
+    streakEnd = firstOverall[best_end]["year"] if longest else None
+    fo_counts = Counter(d["player"] for d in firstOverall)
+    top_name, top_cnt = fo_counts.most_common(1)[0]
+    top_missed = sum(1 for d in firstOverall
+                     if d["player"] == top_name and d["finish"] is None)
+    meta = dict(n=len(firstOverall), titles=titles, missed=missed,
+                streak=longest, streakStart=streakStart, streakEnd=streakEnd,
+                topName=top_name, topCount=top_cnt, topMissed=top_missed)
+
+    # "Your Guy" — each manager's most-repeatedly-drafted player.
+    pair = Counter((p["manager"], norm_name(p["player"])) for p in picks)
+    by_mgr: dict[str, tuple[str, int]] = {}
+    for (mgr, pl), c in pair.items():
+        cur = by_mgr.get(mgr)
+        if cur is None or c > cur[1] or (c == cur[1] and pl < cur[0]):
+            by_mgr[mgr] = (pl, c)
+    crushes = sorted(
+        (dict(manager=m, player=pl, count=c) for m, (pl, c) in by_mgr.items() if c >= 3),
+        key=lambda d: (-d["count"], d["manager"]))
+
+    # League darlings — most-drafted players across every board.
+    darl = Counter(norm_name(p["player"]) for p in picks)
+    darlings = [dict(player=pl, count=c) for pl, c in darl.most_common(8)]
+
+    return dict(firstOverall=firstOverall, crushes=crushes, darlings=darlings, meta=meta)
 
 
 def build_managers(seasons: list[dict]) -> list[dict]:
@@ -82,7 +153,7 @@ def build_managers(seasons: list[dict]) -> list[dict]:
     return managers
 
 
-def build_payload(seasons: list[dict]) -> dict:
+def build_payload(seasons: list[dict], picks: list[dict]) -> dict:
     managers = build_managers(seasons)
     champByYear, runnerByYear = {}, {}
     for s in seasons:
@@ -192,6 +263,7 @@ def build_payload(seasons: list[dict]) -> dict:
         tradeTrend=tradeTrend, donkChamps=donkChamps,
         luck=luck, redemption=redemption, nearMiss=nearMiss,
         droughts=droughts, cinderella=cinderella,
+        draft=build_draft(picks, seasons),
         meta=dict(nSeasons=len(years), firstYear=years[0], lastYear=years[-1],
                   nManagerSeasons=len(seasons),
                   nManagers=len([m for m in managers if m["player"] != "Unknown"])))
@@ -199,7 +271,8 @@ def build_payload(seasons: list[dict]) -> dict:
 
 def main() -> None:
     seasons = load_seasons(DATA_XLSX)
-    payload = build_payload(seasons)
+    picks = load_draft(DATA_XLSX)
+    payload = build_payload(seasons, picks)
     data_json = json.dumps(payload, separators=(",", ":"))
     html = TEMPLATE.read_text(encoding="utf-8").replace("/*__DATA__*/", data_json)
     OUT.write_text(html, encoding="utf-8")
