@@ -116,10 +116,82 @@ def build_payload(seasons: list[dict]) -> dict:
                   for p, ys in donk_years.items()]
     donkChamps.sort(key=lambda d: (-d["donks"], d["years"][0]))
 
+    named = [m for m in managers if m["player"] != "Unknown"]
+    lastYear = years[-1]
+
+    # Within-season points-for rank (1 = top scorer that year) so scoring across
+    # different eras / league sizes compares fairly. Keyed by id() of the season.
+    pf_rank: dict[int, tuple[int, int]] = {}
+    for y in years:
+        sub = sorted((s for s in seasons if s["year"] == y),
+                     key=lambda s: s["pf"], reverse=True)
+        for i, s in enumerate(sub):
+            pf_rank[id(s)] = (i + 1, len(sub))
+
+    def luck_row(s: dict) -> dict:
+        r, n = pf_rank[id(s)]
+        return dict(player=s["player"], year=s["year"], team=s["team"],
+                    wins=s["wins"], losses=s["losses"], pf=s["pf"],
+                    rank=r, of=n, finish=s["finish"])
+
+    # The Luck Lens. "Robbed": high scorers who still missed the playoffs.
+    # "Backed In": weak scorers who reached the playoffs anyway.
+    real = [s for s in seasons if s["player"] != "Unknown"]
+    robbed = sorted((luck_row(s) for s in real if s["finish"] is None),
+                    key=lambda d: (d["rank"], -d["pf"]))[:6]
+    backed_in = sorted((luck_row(s) for s in real if s["finish"] is not None),
+                       key=lambda d: (-d["rank"], d["pf"]))[:6]
+    luck = dict(robbed=robbed, backedIn=backed_in)
+
+    # Redemption arcs — a donk followed by a podium (top-3) within three seasons.
+    redemption = []
+    for m in named:
+        h = m["history"]
+        for i, d in enumerate(h):
+            if not d["donk"]:
+                continue
+            for g in h[i + 1:]:
+                if g["year"] - d["year"] > 3:
+                    break
+                if g["finish"] is not None and g["finish"] <= 3:
+                    redemption.append(dict(player=m["player"], donkYear=d["year"],
+                        gloryYear=g["year"], finish=g["finish"], team=g["team"],
+                        gap=g["year"] - d["year"]))
+                    break
+    redemption.sort(key=lambda d: (d["finish"], d["gap"], d["gloryYear"]))
+
+    # The Near-Miss Club — podium finishes but never a title.
+    nearMiss = [dict(player=m["player"], seasons=m["seasons"], runnerups=m["runnerups"],
+                     thirds=m["thirds"], podiums=m["podiums"], pf=m["pf"])
+                for m in named if m["titles"] == 0 and m["podiums"] > 0]
+    nearMiss.sort(key=lambda d: (-d["runnerups"], -d["podiums"], -d["seasons"]))
+
+    # Title droughts — years since each champion last won (as of the latest season).
+    droughts = [dict(player=m["player"], titles=m["titles"], lastTitle=m["titleYears"][-1],
+                     drought=lastYear - m["titleYears"][-1])
+                for m in named if m["titles"] > 0]
+    droughts.sort(key=lambda d: (-d["drought"], -d["titles"]))
+
+    # Cinderella champions — weakest regular seasons that still won it all,
+    # plus how many rings came out of each draft slot.
+    champ_seasons = [s for s in seasons if s["finish"] == 1]
+    cindyChamps = [dict(player=s["player"], year=s["year"], team=s["team"], wins=s["wins"],
+                        losses=s["losses"], pf=s["pf"], draft=s["draft"], rank=pf_rank[id(s)][0],
+                        of=pf_rank[id(s)][1])
+                   for s in sorted(champ_seasons, key=lambda s: (s["wins"], s["pf"]))[:5]]
+    draft_counts: dict[int, int] = {}
+    for s in champ_seasons:
+        if s["draft"] is not None:
+            draft_counts[s["draft"]] = draft_counts.get(s["draft"], 0) + 1
+    championsByDraft = [dict(slot=k, count=draft_counts[k]) for k in sorted(draft_counts)]
+    cinderella = dict(champs=cindyChamps, byDraft=championsByDraft)
+
     return dict(
         seasons=seasons, managers=managers, champByYear=champByYear,
         runnerByYear=runnerByYear, years=years, superlatives=superlatives,
         tradeTrend=tradeTrend, donkChamps=donkChamps,
+        luck=luck, redemption=redemption, nearMiss=nearMiss,
+        droughts=droughts, cinderella=cinderella,
         meta=dict(nSeasons=len(years), firstYear=years[0], lastYear=years[-1],
                   nManagerSeasons=len(seasons),
                   nManagers=len([m for m in managers if m["player"] != "Unknown"])))
