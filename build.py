@@ -104,11 +104,7 @@ def build_draft(picks: list[dict], seasons: list[dict]) -> dict:
         (dict(manager=m, player=pl, count=c) for m, (pl, c) in by_mgr.items() if c >= 3),
         key=lambda d: (-d["count"], d["manager"]))
 
-    # League darlings — most-drafted players across every board.
-    darl = Counter(norm_name(p["player"]) for p in picks)
-    darlings = [dict(player=pl, count=c) for pl, c in darl.most_common(8)]
-
-    return dict(firstOverall=firstOverall, crushes=crushes, darlings=darlings, meta=meta)
+    return dict(firstOverall=firstOverall, crushes=crushes, meta=meta)
 
 
 def build_managers(seasons: list[dict]) -> list[dict]:
@@ -214,7 +210,7 @@ def build_payload(seasons: list[dict], picks: list[dict]) -> dict:
                        key=lambda d: (-d["rank"], d["pf"]))[:6]
     luck = dict(robbed=robbed, backedIn=backed_in)
 
-    # Redemption arcs — a donk followed by a podium (top-3) within three seasons.
+    # Redemption arcs — a donk followed by a championship within three seasons.
     redemption = []
     for m in named:
         h = m["history"]
@@ -224,12 +220,12 @@ def build_payload(seasons: list[dict], picks: list[dict]) -> dict:
             for g in h[i + 1:]:
                 if g["year"] - d["year"] > 3:
                     break
-                if g["finish"] is not None and g["finish"] <= 3:
+                if g["finish"] == 1:
                     redemption.append(dict(player=m["player"], donkYear=d["year"],
                         gloryYear=g["year"], finish=g["finish"], team=g["team"],
                         gap=g["year"] - d["year"]))
                     break
-    redemption.sort(key=lambda d: (d["finish"], d["gap"], d["gloryYear"]))
+    redemption.sort(key=lambda d: (d["gap"], d["gloryYear"]))
 
     # The Near-Miss Club — podium finishes but never a title.
     nearMiss = [dict(player=m["player"], seasons=m["seasons"], runnerups=m["runnerups"],
