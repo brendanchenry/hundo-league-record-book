@@ -262,6 +262,23 @@
   .fo-row .out.miss{color:var(--red)}
   .fo-row .out.mid{color:var(--ink-2)}
 
+  .slot-block{margin-top:34px}
+  .slot-note{font-size:13px;color:var(--ink-2);line-height:1.55;margin-top:8px;max-width:66ch}
+  .slot-legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;font-size:12px;color:var(--ink-2)}
+  .slot-legend span{display:flex;align-items:center;gap:6px}
+  .slot-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .slot-legend i.pod,.slot-bar i.pod{background:var(--gold-bar)}
+  .slot-legend i.ply,.slot-bar i.ply{background:var(--teal)}
+  .slot-legend i.mis,.slot-bar i.mis{background:color-mix(in srgb,var(--red) 42%,var(--surface-2))}
+  .slot-list{margin-top:14px;display:flex;flex-direction:column;gap:9px}
+  .slot-row{display:grid;grid-template-columns:58px 1fr 118px;align-items:center;gap:14px}
+  .slot-row .sl{font-family:var(--font-display);font-weight:600;font-size:13px;color:var(--ink-2);text-align:right}
+  .slot-bar{display:flex;height:24px;border-radius:5px;overflow:hidden;background:var(--surface-2);cursor:default}
+  .slot-bar i{display:block;height:100%}
+  .slot-row .sm{font-size:12px;color:var(--muted);white-space:nowrap;line-height:1.4}
+  .slot-row .sm b{font-family:var(--font-display);color:var(--ink);font-size:15px}
+  @media(max-width:640px){.slot-row{grid-template-columns:44px 1fr 92px;gap:9px}.slot-row .sm b{font-size:14px}}
+
   /* ---------- DOSSIER ---------- */
   .pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
   .pick button{all:unset;cursor:pointer;padding:8px 14px;border:1px solid var(--line-strong);
@@ -467,6 +484,16 @@
         <div class="cnt"><b id="curseCnt"></b><span>of <em id="curseN"></em> first picks<br>missed the playoffs</span></div>
       </div>
       <div class="fo-list" id="foList"></div>
+      <div class="slot-block">
+        <div class="col-h">Does the slot even matter? — every finish, by draft position</div>
+        <p class="slot-note">Sixteen years of outcomes lined up by where each manager drafted. If the draft order decided anything, the gold and teal would slope cleanly down the board. They scatter — your slot is close to a coin flip.</p>
+        <div class="slot-legend">
+          <span><i class="pod"></i>Podium (top 3)</span>
+          <span><i class="ply"></i>Made the playoffs</span>
+          <span><i class="mis"></i>Missed the playoffs</span>
+        </div>
+        <div class="slot-list" id="slotList"></div>
+      </div>
       <div style="margin-top:34px">
         <div class="col-h gold">Your Guy — the pick each manager keeps making</div>
         <ul class="rlist cols2" id="crushes"></ul>
@@ -760,6 +787,18 @@ $('#crushes').innerHTML=DR.crushes.map(d=>
   `<li><span class="who">${d.manager}<span class="tm">can't stop drafting ${d.player}</span></span>`+
   `<span class="meta"><b class="gold">${d.count}×</b>drafted</span></li>`
 ).join('');
+$('#slotList').innerHTML=DR.slots.map(d=>{
+  const pod=d.podiumRate*100, ply=(d.playoffRate-d.podiumRate)*100, mis=d.missedRate*100;
+  const pc=n=>Math.round(n*100);
+  return `<div class="slot-row"><span class="sl">Pick ${d.slot}</span>`+
+    `<div class="slot-bar" data-tip="<b>Pick ${d.slot}</b> · ${d.seasons} seasons<br>Podium ${pc(d.podiumRate)}% · Playoffs ${pc(d.playoffRate)}% · Missed ${pc(d.missedRate)}%<br>Avg finish ${d.avgFinish??'—'} (in playoff years)">`+
+      `<i class="pod" style="width:${pod}%"></i><i class="ply" style="width:${ply}%"></i><i class="mis" style="width:${mis}%"></i></div>`+
+    `<span class="sm"><b>${d.avgFinish??'—'}</b> avg finish<br>${pc(d.missedRate)}% missed</span></div>`;
+}).join('');
+$('#slotList').querySelectorAll('.slot-bar').forEach(b=>{
+  b.addEventListener('mousemove',e=>showTip(e,b.dataset.tip));
+  b.addEventListener('mouseleave',hideTip);
+});
 
 /* ---------- DOSSIER ---------- */
 const pickWrap=$('#pick');

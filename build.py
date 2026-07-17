@@ -119,7 +119,37 @@ def build_draft(picks: list[dict], seasons: list[dict]) -> dict:
          for m, (pl, c) in by_mgr.items() if c >= 3),
         key=lambda d: (-d["count"], d["manager"]))
 
-    return dict(firstOverall=firstOverall, crushes=crushes, meta=meta)
+    # Does the slot matter? Outcomes by season-long draft position — podium
+    # rate, playoff rate, miss rate, and average finish (over playoff seasons,
+    # since missed seasons have no 7-12 ranking on record).
+    slot_agg: dict[int, dict] = {}
+    for s in seasons:
+        d = s["draft"]
+        if d is None or s["player"] == "Unknown":
+            continue
+        a = slot_agg.setdefault(d, dict(slot=d, seasons=0, playoffs=0, podiums=0,
+                                        missed=0, fin_sum=0, fin_n=0))
+        a["seasons"] += 1
+        f = s["finish"]
+        if f is None:
+            a["missed"] += 1
+        else:
+            a["playoffs"] += 1
+            a["fin_sum"] += f
+            a["fin_n"] += 1
+            if f <= 3:
+                a["podiums"] += 1
+    slots = []
+    for d in sorted(slot_agg):
+        a = slot_agg[d]
+        n = a["seasons"]
+        slots.append(dict(slot=d, seasons=n,
+            playoffRate=round(a["playoffs"] / n, 3),
+            podiumRate=round(a["podiums"] / n, 3),
+            missedRate=round(a["missed"] / n, 3),
+            avgFinish=round(a["fin_sum"] / a["fin_n"], 1) if a["fin_n"] else None))
+
+    return dict(firstOverall=firstOverall, crushes=crushes, slots=slots, meta=meta)
 
 
 def build_managers(seasons: list[dict]) -> list[dict]:
